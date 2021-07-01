@@ -1,0 +1,50 @@
+---
+title: "Data exploration example"
+output: html_document
+---
+
+# Install & load packages  
+As always, we begin with the `install_packages()` (if needed) and `library()` commands to install and load individual packages, respectively.
+```{r, message = FALSE}
+#install.packages('tidyverse', repos = "http://cran.us.r-project.org")
+#install.packages('lubridate', repos = "http://cran.us.r-project.org")
+library(tidyverse)
+library(lubridate)
+```
+
+# Read in your raw NEON data
+```{r}
+path <- "./data/SCBI_mammals_raw/"
+
+files <- list.files(path=path, pattern="*.csv")
+```
+
+Now we'll use the following command to read in all our data files from the folder we specified above! 
+```{r, warning = FALSE}
+for(file in files){
+  perpos <- which(strsplit(file, "")[[1]]==".")
+  assign(
+    gsub(" ","",substr(file, 1, perpos-1)),
+    read_csv(paste(path,file,sep="")))
+}
+```
+
+# Explore a data file
+We always want to keep our **raw** data **raw**, so our next step will be to save a copy of our raw mammal trapping data as a different data object. Also for simplicity, we'll call it "mamdata" (shorter to type!)
+```{r}
+mamdata <- mam_pertrapnight
+```
+
+Now we can use some of the `dplyr` functions we explored last week to begin filtering, organizing, and exploring the data!
+```{r}
+captures <- mamdata %>% 
+  select(siteID, plotID, nlcdClass, collectDate, taxonID, tagID, sex, lifeStage) %>% # Select certain columns
+  filter(!is.na(tagID))                                                              # Only keep rows where "tagID" has data
+```
+
+If you want to save a copy of your *subset* data file, you can run the following command:
+```{r}
+captures %>% 
+  write_csv('./data/subset_mammal_data.csv')
+```
+
