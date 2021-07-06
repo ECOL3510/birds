@@ -1,0 +1,76 @@
+---
+title: "NEON data download"
+output: html_document
+---
+
+### Install & load packages  
+As always, we begin with the `install_packages()` (if needed) and `library()` commands to install and load individual packages, respectively.
+```{r}
+#install.packages('tidyverse', repos = "http://cran.us.r-project.org")
+#install.packages('neonUtilities', repos = "http://cran.us.r-project.org")
+
+library(tidyverse)
+library(neonUtilities)
+```
+
+### Preparing to download data from NEON website
+Now that our packages are loaded, we are ready to start exploring data! 
+
+For each type of NEON data you want to download, you need to know a few things:
+* The specific data product ID (e.g., 'DP1.10072.001')  
+* The 4-letter code for your target NEON site (e.g., 'HARV')  
+* If applicable, the YYYY-MM start and end dates (e.g., '2019-12')  
+
+If you are unsure about the specific data product IDs you need or site codes, navigate to the [NEON data portal](https://data.neonscience.org/data-products/explore) to find that information.
+
+### Practice: Small mammal data
+For practice, we'll download small mammal data from one of our most familiar NEON sites- SCBI between Jan. 2018 and Dec. 2019. 
+
+If you do not want to specify start- and end-dates for your data download, you can omit those lines, which will have R download data from all available dates. **Note that after you initiate the following code chunk, you need to go into the Console and type y to proceed with the download**
+
+#### Download raw data from NEON
+We use the code chunk below to specify the NEON data package we want to download (dpID) and the site(s).  
+By default, NEON data is saved to R as a *list* of data files. However, we have included the `list2env` command as a wrapper below so that the data are saved as separate objects in our RStudio environment pane.
+```{r, eval = FALSE}
+list2env((loadByProduct(dpID = 'DP1.10072.001',
+                           site = c('SCBI'),
+                           startdate = '2018-01',  # YYYY-MM
+                           enddate = '2019-12')),  # YYYY-MM
+         .GlobalEnv)
+```
+
+#### Save each downloaded file
+We now want to save a *local* copy of each of these files, so we don't have to run this download script each time we want to work with the data!
+```{r, eval = FALSE}
+files <- mget(ls())
+
+for (i in 1:length(files)){
+  # Change the SCBI_mammals text below to indicate the name of the folder where you want to store your data
+  write_csv(files[[i]], file = paste0("./SCBI_mammals/", names(files[i]), ".csv", sep=""))
+}
+```
+
+If you want to download another data product, you just run through the process again by modifying the chunks below.  
+However, to avoid any R errors, you'll want to run the following command to clear your Environment of data frames from your previous data download (but don't worry! You've saved the files!)
+```{r}
+rm(list = ls())
+```
+
+Update the chunk below for the next data product you would like to download:
+```{r, eval = FALSE}
+list2env((loadByProduct(dpID = 'DP1.10072.001',
+                           site = c('SCBI'),
+                           startdate = '2018-01',  # YYYY-MM
+                           enddate = '2019-12')),  # YYYY-MM
+         .GlobalEnv)
+```
+
+Before you run the next chunk, remember to update the folder name of where you want your files to be saved if it's somewhere different than you saved your last file batch!
+```{r, eval = FALSE}
+files <- mget(ls())
+
+for (i in 1:length(files)){
+  # Change the SCBI_mammals text below to indicate the name of the folder where you want to store your data
+  write_csv(files[[i]], file = paste0("./data/SCBI_mammals_raw/", names(files[i]), ".csv", sep=""))
+}
+```
