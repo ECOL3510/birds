@@ -14,7 +14,7 @@ library(lubridate)
 
 # Read in your raw NEON data
 ```{r}
-path <- "./data/SCBI_mammals_raw/"
+path <- "./SCBI_mammals/"
 
 files <- list.files(path=path, pattern="*.csv")
 ```
@@ -45,6 +45,5 @@ captures <- mamdata %>%
 If you want to save a copy of your *subset* data file, you can run the following command:
 ```{r}
 captures %>% 
-  write_csv('./data/subset_mammal_data.csv')
+  write_csv('./cleaned_data/subset_mammal_data.csv')
 ```
-
