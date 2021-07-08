@@ -56,10 +56,11 @@ rm(list = ls())
 
 Update the chunk below for the next data product you would like to download:
 ```{r, eval = FALSE}
-list2env((loadByProduct(dpID = 'DP1.10003.001',
-                           site = c('SOAP'),
+list2env((loadByProduct(dpID = 'DP1.00002.001',
+                           site = c('SERC', 'UKFS', 'NOGP', 'STER'),
                            startdate = '2018-01',  # YYYY-MM
-                           enddate = '2019-12')),  # YYYY-MM
+                           enddate = '2019-12',
+                        timeIndex="30")),  # YYYY-MM
          .GlobalEnv)
 ```
 

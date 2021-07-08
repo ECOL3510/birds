@@ -1,0 +1,107 @@
+X1
+###################################
+########### Disclaimer ############
+This is the most recent readme publication based on all site-date combinations used during stackByTable.
+"Information specific to the query, including sites and dates, has been removed. The remaining content reflects general metadata for the data product."
+"All files used during stacking are listed at the bottom of this document, which includes the data publication dates."
+##################################
+"This data package been produced by and downloaded from the National Ecological Observatory Network (NEON). NEON is funded by the National Science Foundation (Awards 0653461, 0752017, 1029808, 1138160, 1246537, 1638695, 1638696, 1724433) and managed cooperatively by Battelle. These data are provided under the terms of the NEON data policy at https://www.neonscience.org/data-policy."
+DATA PRODUCT INFORMATION
+------------------------
+ID: NEON.DOM.SITE.DP1.00002.001
+Name: Single aspirated air temperature
+"Description: Air temperature, available as one- and thirty-minute averages of 1 Hz observations. Observations are made by sensors located at multiple heights on the tower infrastructure and by sensors located on the aquatic meteorological station. Temperature observations are made using platinum resistance thermometers, which are housed in a fan aspirated shield to reduce radiative bias."
+NEON Science Team Supplier: Terrestrial Instrument System
+"Abstract: Single aspirated air temperature measurements, available as one- and thirty-minute averages of 1 Hz observations. Temperature is one of the most fundamental physical measurements.  It is a primary driving factor for countless physical, chemical, and biological processes. The single aspirated sensor assembly comprises an individual Platinum Resistance Thermometer (PRT) housed within an"
+Latency:
+Data collected in any given month are published during the second full week of the following month.
+Brief Design Description: Multiple Single Aspirated Air Temperature (SAAT) assemblies are deployed at tower sites. SAAT assemblies are located on each boom arm below the top of the tower. A single SAAT assembly is deployed at aquatic sites and is located on the aquatic met station 3m above ground level.
+Brief Study Area Description: These data are collected at all NEON terrestrial and aquatic sites.
+"Sensor(s): Thermometrics Climate RTD 100 Ω Probe, housed within a Met One 076B fan aspirated radiation shield"
+"Keywords: platinum resistance thermometers (PRT), single aspirated air temperature (SAAT), air temperature, meteolorogy, tower, met station, profile"
+DATA PACKAGE CONTENTS
+---------------------
+This data product contains up to 2 data tables:
+SAAT_1min - Single aspirated air temperature averaged over 1 minute
+SAAT_30min - Single aspirated air temperature averaged over 30 minutes
+"If data are unavailable for the particular sites and dates queried, some tables may be absent."
+"Basic download package definition: The basic download package includes the data product, summary statistics, expanded uncertainty, and final quality flag."
+Expanded download package definition: The expanded download package includes the basic package information plus quality metrics for all of the quality assessment and quality control analyses.
+FILE NAMING CONVENTIONS
+-----------------------
+NEON data files are named using a series of component abbreviations separated by periods. File naming conventions for NEON data files differ between NEON science teams. A file will have the same name whether it is accessed via NEON's data portal or API. Please visit https://www.neonscience.org/data-formats-conventions for a full description of the naming conventions.
+ISSUE LOG
+---------
+"This log provides a list of issues that were identified during data collection or processing, prior to publication of this data package. For a more recent log, please visit this data product's detail page at https://data.neonscience.org/data-products/DP1.00002.001."
+Issue Date: 2020-03-26
+"Issue: Coefficients used in IS data processing to compute the uncertainty contributed by resistance or voltage readings made by the field data acquisition system (FDAS) were updated. The updated coefficients are based on a larger FDAS sample and are larger than previous estimates. Although the difference between previous uncertainty estimates and updated estimates is small, there may be periods"
+Date Range: 2019-12-11 to 2019-12-11
+Location(s) Affected: All
+Resolution Date: 2020-06-10
+Resolution: 2019-12-11: Updated coefficients implemented in forward  processing.
+Issue Date: 2020-03-26
+"Issue: The alpha and beta quality metric multipliers used for computing the final quality flag were swapped in processing. The final quality flag is raised when alphaQM*m + betaQM*n >= 20%. The multiplier m should be set to 2 and n should be set to 1, but these values were swapped, making it slightly harder to raise the final quality flag. These multipliers were corrected in data produced after"
+Date Range: 2020-01-08 to 2020-01-08
+Location(s) Affected: All
+Resolution Date: 2020-06-10
+Resolution: 2020-01-08: Processing code corrected in forward processing.
+Issue Date: 2020-06-10
+"Issue: All data were reprocessed with the most recent algorithms, quality control thresholds, and/or other metadata to improve overall data coverage and quality. Notes have been added to the logs of previously identified issues that have been corrected."
+Date Range: 2013-01-01 to 2020-06-10
+Location(s) Affected: All.
+Resolution Date: 2020-06-10
+Resolution:
+Issue Date: 2019-11-18
+Issue: sensor malfunction resulted in implausible values
+Date Range: 2018-05-01 to 2018-06-01
+Location(s) Affected: SCBI tower level 1 (000.010)
+Resolution Date: 2019-11-18
+Resolution: manually flagged affected data
+Issue Date: 2019-05-20
+Issue: MET station hit by falling tree
+Date Range: 2019-04-19 to 2019-05-16
+Location(s) Affected: POSE (HOR.VER: 200.000)
+Resolution Date: 2019-05-16
+Resolution: MET station leveled.  Manual flagging applied
+Issue Date: 2019-02-19
+Issue: Incorrect calibration information was applied to data for some sites and time periods.
+Date Range: 2018-01-01 to 2018-10-31
+Location(s) Affected: All locations.
+Resolution Date: 2019-02-19
+Resolution: Data reprocessed with correct calibration information.
+Issue Date: 2018-09-25
+Issue: Sensors streaming from wrong location.  HOR.VER 000.010 and HOR.VER 000.020 fans were switched.
+Date Range: 2016-12-15 to 2018-09-19
+Location(s) Affected: JORN (HOR.VER 000.010 and HOR.VER 000.020)
+Resolution Date: 2018-09-25
+Resolution: Fan locations corrected and manual flagging applied.
+Issue Date: 2018-05-08
+Issue: Sensor not powered down for cleaning.
+Date Range: 2018-04-19 to 2018-04-19
+Location(s) Affected: NIWO (HOR.VER 000.020)
+Resolution Date: 2018-05-08
+Resolution: Applied manual flagging.
+Issue Date: 2018-01-09
+Issue: Removed aspirated air sensors on ML1 for winterization
+Date Range: 2017-10-10 to 2018-06-13
+Location(s) Affected: TOOL
+Date Range: 2017-10-24 to 2018-05-10
+Location(s) Affected: NIWO
+Date Range: 2017-12-11 to 2018-04-25
+Location(s) Affected: BART
+Resolution Date: 2018-01-09
+Resolution: Sensor reinstalled.
+ADDITIONAL INFORMATION
+----------------------
+"Due to an implementation error affecting flow rates within the aspirated assembly, the flow quality metrics in the expanded data product have been incorrectly generated. This affects final quality flagging of the product. Archived (historic) data will be re-processed accordingly over the next six months. Data from August 17, 2017 and forward will be archived internally but not publicly released"
+NEON DATA POLICY AND CITATION GUIDELINES
+----------------------------------------
+A citation statement is available in this data product's detail page at https://data.neonscience.org/data-products/DP1.00002.001. Please visit https://www.neonscience.org/data-policy for more information about NEON's data policy and citation guidelines.
+DATA QUALITY AND VERSIONING
+---------------------------
+"NEON data are initially published with a status of Provisional, in which updates to data and/or processing algorithms will occur on an as-needed basis, and query reproducibility cannot be guaranteed. Once data are published as part of a Data Release, they are no longer provisional, and are associated with a stable DOI."
+"To learn more about provisional versus released data, please visit https://www.neonscience.org/data-revisions-releases."
+POST STACKING README DOCUMENTATION
+----------------------------------
+Each row contains the readme filename used during stackByTable
+NEON.D09.NOGP.DP1.00002.001.readme.20210123T023002Z.txt
