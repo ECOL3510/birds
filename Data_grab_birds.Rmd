@@ -72,6 +72,6 @@ files <- mget(ls())
 
 for (i in 1:length(files)){
   # Change the SCBI_mammals text below to indicate the name of the folder where you want to store your data
-  write_csv(files[[i]], file = paste0("./temp_data_raw/", names(files[i]), ".csv", sep=""))
+  write_csv(files[[i]], file = paste0("./temperature_raw/", names(files[i]), ".csv", sep=""))
 }
 ```
