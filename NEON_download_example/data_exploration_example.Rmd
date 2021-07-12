@@ -1,0 +1,79 @@
+---
+title: "Data exploration example"
+output: html_document
+---
+
+# Install & load packages  
+As always, we begin with the `install_packages()` (if needed) and `library()` commands to install and load individual packages, respectively.
+```{r, message = FALSE}
+#install.packages('tidyverse', repos = "http://cran.us.r-project.org")
+#install.packages('lubridate', repos = "http://cran.us.r-project.org")
+library(tidyverse)
+library(lubridate)
+```
+
+# Read in your raw NEON data
+```{r}
+path <- "./SCBI_mammals/"
+
+files <- list.files(path=path, pattern="*.csv")
+```
+
+Now we'll use the following command to read in all our data files from the folder we specified above! 
+```{r, warning = FALSE}
+for(file in files){
+  perpos <- which(strsplit(file, "")[[1]]==".")
+  assign(
+    gsub(" ","",substr(file, 1, perpos-1)),
+    read_csv(paste(path,file,sep="")))
+}
+```
+
+# Explore a data file
+We always want to keep our **raw** data **raw**, so our next step will be to save a copy of our raw mammal trapping data as a different data object. Also for simplicity, we'll call it "mamdata" (shorter to type!)
+```{r}
+mamdata <- mam_pertrapnight
+View(mamdata)
+```
+
+Now we can use some of the `dplyr` functions we explored last week to begin filtering, organizing, and exploring the data!
+
+Often, it is helpful to get R to list out the column names for us, so that we an easily see how the variables we want to **keep** are spelled. 
+```{r}
+names(mamdata)
+```
+
+Then, we can apply a `select()` command to **select** the columns we want to **keep**
+(If we wanted, we could also "anti-select" by using a - before the column name)
+```{r}
+captures <- mamdata %>% 
+  mutate(collectDate = as.Date(collectDate)) %>% 
+  select(siteID, plotID, nlcdClass, collectDate, taxonID, tagID, sex, lifeStage) # Select certain columns
+
+glimpse(captures)
+```
+
+Because it seems that there are a lot of NA values for our focal variable (in this example, tagID), we can layer on the following command to remove those rows. Notice how much these layered cleaning commands reduce the number of columns and rows we are working with. 
+```{r}
+captures <- captures %>% 
+  filter(!is.na(tagID)) # Only keep rows where "tagID" has data
+
+View(captures)
+```
+
+
+If you want to save a copy of your *subset* data file (particularly if your raw data file was too large to commit and push to GitHub), you can run the following command. 
+Make sure to double-check the folder path where you're telling R to store the new file before your run this chunk!
+```{r}
+captures %>% 
+  write_csv('./clean_data/subset_mammal_data.csv')
+```
+
+We can also use functions like `summarize()` to collapse multiple rows of data, such as to calculate the mean and standard deviation of our dataset, or to count the number of instances something takes place.
+```{r}
+taxa_per_night <- captures %>% 
+  mutate(month = month(collectDate)) %>% # Create a new column called "month" based on the collection date
+  group_by(taxonID, month) %>%  # Group our observations by month and taxon
+  summarize(n = n()) %>%  # Summarize the number of individuals captured per taxa per month
+  arrange(taxonID, -n) # Default `arrange()` is low to high; the - here tells R to sort from high to low
+```
