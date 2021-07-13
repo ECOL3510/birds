@@ -1,0 +1,16 @@
+---
+title: "Data_analysis_birds"
+output: html_document
+---
+load required packages
+```{r setup, include=FALSE}
+library(tidyverse)
+library(neonUtilities)
+```
+
+pull in csv's for bird and temp data
+```{r}
+raw_bird<-read_csv("./Bird_data/brd_countdata.csv")
+raw_temp<-read_csv("./temp_data_raw/SAAT_30min.csv")
+```
+
