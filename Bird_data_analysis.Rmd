@@ -40,15 +40,48 @@ temp <- SAAT_30min %>%
   filter(!is.na(tempSingleMean))
 ```
 
-Remove columns not pertinent to out needs
+Remove columns not pertinent to our needs
 ```{r}
 temp_sub <- temp %>% 
   mutate(date = as.Date(startDateTime),
          month = month(date),
          year = year(date),
+         day = day(date),
          time = as_hms(startDateTime)) %>% 
-  select(siteID, year, month, date, time, tempSingleMean:tempSingleMaximum, finalQF)
+  select(siteID, year, month, day, date, time, tempSingleMean:tempSingleMaximum, finalQF)
 
 View(temp_sub)
+```
+
+Remove data that failed quality test
+```{r}
+temp_sub <- temp_sub %>% 
+  filter(finalQF != 1)
+```
+
+Pull daily average temperature from the temp data
+```{r}
+daily_temp <- temp_sub  %>% 
+  group_by(siteID, date) %>% 
+  summarize(dailyMean = mean(tempSingleMean)) %>% 
+  arrange(siteID, date)
+
+View(daily_temp)
+```
+
+Write daily temp csv
+```{r}
+daily_temp %>% 
+  write_csv('./Data_clean/daily_temp.csv')
+```
+
+change bird data name
+```{r}
+bird_raw <- brd_countdata
+```
+
+
+```{r}
+
 ```
 
