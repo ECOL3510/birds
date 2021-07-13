@@ -6,11 +6,49 @@ load required packages
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(neonUtilities)
+library(lubridate)
+library(hms)
 ```
 
 pull in csv's for bird and temp data
 ```{r}
-raw_bird<-read_csv("./Bird_data/brd_countdata.csv")
-raw_temp<-read_csv("./temp_data_raw/SAAT_30min.csv")
+path <- "./Bird_data/"
+
+files <- list.files(path=path, pattern="*.csv")
+
+for(file in files){
+  perpos <- which(strsplit(file, "")[[1]]==".")
+  assign(
+    gsub(" ","",substr(file, 1, perpos-1)),
+    read_csv(paste(path,file,sep=""), guess_max = 10000))
+}
+
+path <- "./temperature_raw/"
+
+files <- list.files(path=path, pattern="*.csv")
+
+for(file in files){
+  perpos <- which(strsplit(file, "")[[1]]==".")
+  assign(
+    gsub(" ","",substr(file, 1, perpos-1)),
+    read_csv(paste(path,file,sep=""), guess_max = 500000))
+}
+```
+Filter N/As out of temp data
+```{r}
+temp <- SAAT_30min %>% 
+  filter(!is.na(tempSingleMean))
+```
+
+Remove columns not pertinent to out needs
+```{r}
+temp_sub <- temp %>% 
+  mutate(date = as.Date(startDateTime),
+         month = month(date),
+         year = year(date),
+         time = as_hms(startDateTime)) %>% 
+  select(siteID, year, month, date, time, tempSingleMean:tempSingleMaximum, finalQF)
+
+View(temp_sub)
 ```
 
