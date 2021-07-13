@@ -79,9 +79,34 @@ change bird data name
 ```{r}
 bird_raw <- brd_countdata
 ```
+#select the columns we want to keep in our data
+```{r}
+bird_raw <- bird_raw %>%
+  select(siteID, startDate, taxonID, vernacularName, clusterSize, taxonRank)
+```
 
+
+#filter species out of taxonRank column
+```{r}
+bird_species <- bird_raw %>% 
+  filter(taxonRank == "species")
+```
+#group by species
+```{r}
+bird_species_T <- bird_species %>%
+  group_by(siteID, startDate, taxonID) %>%
+tally()
+```
+
+#calculating alpha diversity
 
 ```{r}
-
+bird_diversity <- bird_species_T %>%
+  group_by(siteID, startDate)%>%
+summarize(alpha = n_distinct(taxonID))
+```
+```{r}
+bird_diversity %>%
+  write_csv('./Data_clean/bird_diversity.csv')
 ```
 
