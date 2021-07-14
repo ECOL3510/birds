@@ -1,0 +1,167 @@
+---
+title: "Data analysis skeleton: Update to reflect your team's analyses!"
+output: html_document
+---
+
+# Load necessary packages
+```{r}
+install.packages('pacman', repos = "http://cran.us.r-project.org")
+pacman::p_load(tidyverse, broom, lubridate, performance, see, qqplotr, gvlma)
+```
+
+# Load cleaned data files
+## Data type 1: 
+```{r, eval = FALSE}
+object1_name <- read_csv('./clean_data_folder/file_name.csv')
+
+glimpse(object1_name)
+```
+
+## Data type 2:
+```{r, eval = FALSE}
+object2_name <- read_csv('./clean_data_folder/file_name.csv')
+
+glimpse(object2_name)
+```
+
+## Combine data files based on shared criteria
+Type out some details of what the column names are that your data objects have in common. Note that for R to combine them, the column names must be **exactly** the same (e.g., spelling, capitalization, etc.)
+```{r, eval = FALSE}
+data <- full_join(object1_name, object2_name) 
+
+View(data)
+```
+
+# Statistical analysis:
+* If your independent variable is categorical (e.g., siteID) and your dependent variable is continuous (numeric values), you should perform an ANOVA.  
+For ANOVA, the R syntax is: **aov(dependent_variable_name ~ independent_variable_name, data = data_object_name)**
+
+* If your independent variable and your dependent variable are both continuous (numeric values), you should perform a linear regression.  
+For linear regression, the R syntax is: **lm(dependent_variable_name ~ independent_variable_name, data = data_object_name)**
+
+Note that you should use a different "model_name" for each statistical test you are conducting.
+
+## ANOVA
+Write a brief statement about what you're comparing, ecologically, with each planned analysis.
+
+First, let's make a quick plot of our site-level response variable; after we run our ANOVA we can visually compare this graph our statistical test results:
+```{r}
+ggplot(data = data_object_name, aes(x = independent_variable_name, # name the variable that goes on the x-axis
+                                    y = dependent_variable_name,  # name the variable that goes on the y-axis
+                                    fill = independent_variable_name)) + # name the variable to differentiate colors
+  geom_boxplot() +  # Graph these variables using boxplots
+  theme_minimal()
+```
+
+Now, we're ready to define our ANOVA model:
+```{r}
+model_name <- aov(dependent_variable_name ~ independent_variable_name, data = data_object_name)
+```
+
+Next, we can use this quick command to check the ANOVA model assumptions:
+```{r, warning=F}
+# Check for homogeneity of variance: 
+leveneTest(dependent_variable_name ~ independent_variable_name, data = data_object_name)
+# If the p-value of Levene's test is greater than 0.05, we have not violated the assumption of homogeneity of variance
+
+# Check for normality of residuals:
+## 1) Extract the model residuals
+aov_residuals <- residuals(object = model_name)
+
+## 2) Run Shapiro-Wilk test
+shapiro.test(x = aov_residuals )
+
+# Visualize model checks as graphs
+check_model(model_name)
+```
+
+*(If our data violate the homogeneity of variance assumption, we can instead do a Welch one-way test using the `oneway.test()` function below)*
+```{r}
+oneway.test(dependent_variable_name ~ independent_variable_name, data = data_object_name)
+
+pairwise.t.test(data_object_name$dependent_variable_name,
+                data_object_name$independent_variable_name,
+                 p.adjust.method = "BH", pool.sd = FALSE)
+```
+
+If our model assumptions seem to be satisfied, we can look at the ANOVA output! 
+```{r}
+summary(model_name)
+```
+If the model p-value is smaller than 0.05 (our standard alpha), we reject the null hypothesis and conclude that there is a significant difference in our dependent variable between *at least two* sites.
+
+But which site(s) are different? We'll use a post-hoc Tukey test to find out!
+```{r}
+tukey <- tidy(TukeyHSD(model_name))
+print(tukey)
+```
+Note that the "estimate" column tells you how different the mean values of each pair of sites is.
+
+If you have a *lot* of contrasts, you can run the command below to only show the statistically significant (p <0.05) contrasts:
+```{r}
+tukey %>% 
+  filter(adj.p.value < 0.05)
+```
+
+If you have a *lot* of contrasts, you can run the command below to only show the statistically significant (p <0.05) contrasts:
+```{r}
+sig <- tukey %>% 
+  filter(adj.p.value < 0.05)
+
+print(sig)
+```
+
+## Correlation &Linear regression
+Write a brief statement about what you're comparing, ecologically, with each planned analysis.
+
+First, let's make a quick plot to see what the data look like
+```{r}
+ggplot(data = data_object_name, aes(x = independent_variable_name, # name the variable that goes on the x-axis
+                                    y = dependent_variable_name,  # name the variable that goes on the y-axis
+                                    col = siteID)) + # name the variable to differentiate colors
+  geom_point(pch = 16) +  # Graph these variables as a scatterplot
+  theme_minimal()
+```
+
+We can calculate a correlation coefficient to quantify the strength and direction of association between the two variables.
+
+The types of correlation you can use are:  
+
+* Pearson: Parametric correlation (requires data be normally distributed) for continuous data   
+
+* Spearman: Non-parametric (e.g., if your data are not normally distributed) correlation can also take ordinal data
+
+```{r}
+cor_alpha <- cor.test(data_object_name$independent_variable_name, 
+                      data_object_name$dependent_variable_name, 
+                      method = "pearson") # can also use method = "spearman"
+
+tidy(cor_alpha)
+```
+
+Now, let's set up and run a linear model to conduct a linear regression.
+```{r}
+model_name2 <- lm(dependent_variable_name ~ independent_variable_name, data = data_object_name)
+```
+
+Next, we can use a few quick commands to check the linear regression model assumptions:
+```{r, warning=F}
+check_model(model_name2)
+gvlma(model_name2)
+```
+
+If our model assumptions seem to be satisfied, we can look at the ANOVA output! 
+```{r}
+summary(model_name2)
+```
+
+And make a quick plot with the calculated best fit lines for each site. Remember that ecological data reporting convention is to **omit** the trend line for non-significant relationships.
+```{r, message=F}
+ggplot(data = data_object_name, aes(x = dependent_variable_name, # name the variable that goes on the x-axis
+                                    y = independent_variable_name,  # name the variable that goes on the y-axis
+                                    col = siteID)) + # name the variable to differentiate colors
+  geom_point(pch = 16) +  # Graph these variables as a scatterplot
+  geom_smooth(method = 'lm', aes(group=1), col = 'black', lty = 2) +  # lty=1 for solid line
+  #geom_abline(intercept = 6.81098, slope = -0.08871) +  # Alternate method than geom_smooth to specify line slope & intercept
+  theme_minimal()
+```
