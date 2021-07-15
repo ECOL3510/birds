@@ -41,6 +41,29 @@ For linear regression, the R syntax is: **lm(dependent_variable_name ~ independe
 
 Note that you should use a different "model_name" for each statistical test you are conducting.
 
+## Summary/descriptive statistics
+Often, we report summary statistics like the mean, a measure of variance (standard deviation, standard error, 95% confidence intervals) and the sample size. 
+
+We can do this easily through the use of `dplyr()` commands. In this example, we can calculate average annual values per site using:
+```{r}
+summary <- data %>% 
+  mutate(year = year(date)) %>% 
+  group_by(siteID, year) %>% 
+  summarize(n = n(),  # Sample size
+            mean_var1 = mean(Var1), sd_var1 = sd(Var1), se_var1 = sd_var1/sqrt(n), # Mean, sd, se for var1
+            mean_var2 = mean(Var2), sd_var2 = sd(Var2), se_var2 = sd_var2/sqrt(n)) # Mean, sd, se for var1
+
+glimpse(summary)
+```
+
+To simplify reporting, we can also ask R to round all of these calculated values to a specific number of decimal places:
+```{r}
+summary <- as_tibble(summary) %>% 
+  mutate_at(vars(mean_var1:se_var2), funs(round(.,2))) # Round each of our calculated columns to 2 decimals
+
+print(summary)
+```
+
 ## ANOVA
 Write a brief statement about what you're comparing, ecologically, with each planned analysis.
 
