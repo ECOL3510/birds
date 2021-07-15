@@ -82,7 +82,10 @@ bird_raw <- brd_countdata
 #select the columns we want to keep in our data
 ```{r}
 bird_raw <- bird_raw %>%
-  select(siteID, startDate, taxonID, vernacularName, clusterSize, taxonRank)
+  select(siteID, startDate, taxonID, vernacularName, clusterSize, taxonRank) %>%
+  mutate(date = as.Date(startDate),
+         time = as_hms(startDate))
+         
 ```
 
 
@@ -94,7 +97,7 @@ bird_species <- bird_raw %>%
 #group by species
 ```{r}
 bird_species_T <- bird_species %>%
-  group_by(siteID, startDate, taxonID) %>%
+  group_by(siteID, date, taxonID) %>%
 tally()
 ```
 
@@ -102,11 +105,89 @@ tally()
 
 ```{r}
 bird_diversity <- bird_species_T %>%
-  group_by(siteID, startDate)%>%
+  group_by(siteID, date)%>%
 summarize(alpha = n_distinct(taxonID))
 ```
 ```{r}
 bird_diversity %>%
   write_csv('./Data_clean/bird_diversity.csv')
+```
+
+eliminate NAs
+```{r}
+bird_count <- bird_raw %>% 
+  filter(!is.na(clusterSize))
+```
+
+
+Find total bird count
+```{r}
+Bird_total<-bird_count %>%
+  group_by(siteID, date) %>%
+  summarize(total_birds = sum(clusterSize))
+```
+
+Write bird total csv
+```{r}
+Bird_total %>%
+  write_csv('./Data_clean/bird_total.csv')
+```
+
+
+Pull in clean data
+```{r}
+path <- "./Data_clean/"
+
+files <- list.files(path=path, pattern="*.csv")
+
+for(file in files){
+  perpos <- which(strsplit(file, "")[[1]]==".")
+  assign(
+    gsub(" ","",substr(file, 1, perpos-1)),
+    read_csv(paste(path,file,sep=""), guess_max = 10000))
+}
+
+```
+Join clean data
+```{r}
+full_data <- full_join(bird_diversity, bird_total) %>% 
+  full_join(., daily_temp) 
+
+View(full_data)
+```
+
+Filter out NAs
+```{r}
+full_datam <- full_data %>% 
+  filter(!is.na(alpha & dailyMean))
+```
+
+summarize data for statistics
+```{r}
+summary <- full_datam %>% 
+  group_by(siteID) %>% 
+  summarize(n = n(),  # Sample size
+            mean_dailyMean = mean(dailyMean), sd_dailyMean = sd(dailyMean), se_dailyMean = sd_dailyMean/sqrt(n), # Mean, sd, se for dailyMean
+            mean_alpha = mean(alpha), sd_alpha = sd(alpha), se_alpha = sd_alpha/sqrt(n),
+            mean_total = mean(total_birds), sd_total = sd(total_birds), se_total = sd_total/sqrt(n))
+
+glimpse(summary)
+```
+
+Round decimals
+```{r}
+summary <- as_tibble(summary) %>% 
+  mutate_at(vars(mean_dailyMean:se_total), funs(round(.,2))) # Round each of our calculated columns to 2 decimals
+
+print(summary)
+```
+
+Linear regression
+```{r}
+ggplot(data = full_datam, aes(x = dailyMean, # name the variable that goes on the x-axis
+                                    y = alpha,  # name the variable that goes on the y-axis
+                                    col = siteID)) + # name the variable to differentiate colors
+  geom_point(pch = 16) +  # Graph these variables as a scatterplot
+  theme_minimal()
 ```
 
