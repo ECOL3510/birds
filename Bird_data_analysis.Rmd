@@ -191,3 +191,11 @@ ggplot(data = full_datam, aes(x = dailyMean, # name the variable that goes on th
   theme_minimal()
 ```
 
+```{r}
+ggplot(data = full_datam, aes(x = dailyMean, # name the variable that goes on the x-axis
+                                    y = total_birds,  # name the variable that goes on the y-axis
+                                    col = siteID)) + # name the variable to differentiate colors
+  geom_point(pch = 16) +  # Graph these variables as a scatterplot
+  theme_minimal()
+```
+
