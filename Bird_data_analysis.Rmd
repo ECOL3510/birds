@@ -8,6 +8,7 @@ library(tidyverse)
 library(neonUtilities)
 library(lubridate)
 library(hms)
+pacman::p_load(tidyverse, broom, lubridate, performance, see, qqplotr, gvlma,ggrepel)
 ```
 
 pull in csv's for bird and temp data
@@ -158,13 +159,13 @@ View(full_data)
 
 Filter out NAs
 ```{r}
-full_datam <- full_data %>% 
+full_data <- full_data %>% 
   filter(!is.na(alpha & dailyMean))
 ```
 
 summarize data for statistics
 ```{r}
-summary <- full_datam %>% 
+summary <- full_data %>% 
   group_by(siteID) %>% 
   summarize(n = n(),  # Sample size
             mean_dailyMean = mean(dailyMean), sd_dailyMean = sd(dailyMean), se_dailyMean = sd_dailyMean/sqrt(n), # Mean, sd, se for dailyMean
@@ -184,7 +185,7 @@ print(summary)
 
 Linear regression
 ```{r}
-ggplot(data = full_datam, aes(x = dailyMean, # name the variable that goes on the x-axis
+ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the x-axis
                                     y = alpha,  # name the variable that goes on the y-axis
                                     col = siteID)) + # name the variable to differentiate colors
   geom_point(pch = 16) +  # Graph these variables as a scatterplot
@@ -192,10 +193,95 @@ ggplot(data = full_datam, aes(x = dailyMean, # name the variable that goes on th
 ```
 
 ```{r}
-ggplot(data = full_datam, aes(x = dailyMean, # name the variable that goes on the x-axis
+ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the x-axis
                                     y = total_birds,  # name the variable that goes on the y-axis
                                     col = siteID)) + # name the variable to differentiate colors
   geom_point(pch = 16) +  # Graph these variables as a scatterplot
+  theme_minimal()
+```
+
+Run correlation for diversity
+```{r}
+cor_div <- cor.test(full_data$dailyMean, 
+                      full_data$alpha, 
+                      method = "pearson") # can also use method = "spearman"
+
+tidy(cor_div)
+```
+
+Run linear regression test for diversity
+```{r}
+div_model <- lm(alpha ~ dailyMean, data = full_data)
+```
+```{r}
+#check_model(div_model)
+gvlma(div_model)
+```
+```{r}
+summary(div_model)
+```
+```{r}
+ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the x-axis
+                                    y = alpha,  # name the variable that goes on the y-axis
+                                    col = siteID)) + # name the variable to differentiate colors
+  geom_point(pch = 16) +  # Graph these variables as a scatterplot
+  geom_smooth(method = 'lm', aes(group=1), col = 'black', lty = 1) +  # lty=1 for solid line
+  #geom_abline(intercept = 6.81098, slope = -0.08871) +  # Alternate method than geom_smooth to specify line slope & intercept
+  theme_minimal()
+```
+
+
+Run correlation for total
+```{r}
+cor_total <- cor.test(full_data$dailyMean, 
+                      full_data$total_birds, 
+                      method = "pearson") # can also use method = "spearman"
+
+tidy(cor_total)
+```
+
+run linear regression for total
+```{r}
+total_model <- lm(total_birds ~ dailyMean, data = full_data)
+```
+```{r}
+#check_model(model_name2)
+gvlma(total_model)
+```
+
+```{r}
+summary(total_model)
+```
+
+## remove outliers then run regression
+```{r}
+subset<-full_data %>%
+  filter(total_birds<300)
+```
+
+```{r}
+cor_total_subset <- cor.test(subset$dailyMean, 
+                      subset$total_birds, 
+                      method = "pearson") # can also use method = "spearman"
+
+tidy(cor_total_subset)
+```
+```{r}
+total_model_subset <- lm(total_birds ~ dailyMean, data = subset)
+```
+```{r}
+gvlma(total_model_subset)
+```
+```{r}
+summary(total_model_subset)
+```
+```{r}
+ggplot(data = subset, aes(x = dailyMean, # name the variable that goes on the x-axis
+                                    y = total_birds,  # name the variable that goes on the y-axis
+                                    col = siteID)) + # name the variable to differentiate colors
+  geom_point(pch = 16) +  # Graph these variables as a scatterplot
+  geom_smooth(method = 'lm', aes(group=1), col = 'black', lty = 1) +  # lty=1 for solid line
+  #geom_abline(intercept = 6.81098, slope = -0.08871) +  # Alternate method than geom_smooth to specify line slope & intercept
   theme_minimal()
 ```
 

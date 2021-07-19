@@ -27,7 +27,7 @@ glimpse(object2_name)
 ## Combine data files based on shared criteria
 Type out some details of what the column names are that your data objects have in common. Note that for R to combine them, the column names must be **exactly** the same (e.g., spelling, capitalization, etc.)
 ```{r, eval = FALSE}
-data <- full_join(object1_name, object2_name) 
+data <- full_join(bird_diversity, bird_total, daily_temp) 
 
 View(data)
 ```
