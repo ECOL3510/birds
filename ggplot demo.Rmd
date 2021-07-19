@@ -1,0 +1,91 @@
+---
+title: "ggplot Demonstration"
+output: 
+  html_document:
+    keep_md: true
+---
+
+# Load packages
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(palmerpenguins)
+```
+
+# Load demo data 
+```{r}
+glimpse(penguins)
+```
+
+# Histogram of data distribution
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm)) +
+  geom_histogram(aes(fill = species),
+                 alpha = 0.5,
+                 position = "identity") +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  theme_minimal() +
+  labs(x = "Flipper length (mm)", # Specify axis labels
+       y = "Frequency",
+       fill = "Penguin species")
+```
+# Species as separate panels
+```{r}
+ggplot(data = penguins, aes(x = flipper_length_mm)) +
+  geom_histogram(aes(fill = species),
+                 alpha = 0.5,
+                 position = "identity") +
+  scale_fill_manual(values = c("darkorange","purple","cyan4")) +
+  theme_minimal() +
+  labs(x = "Flipper length (mm)", # Specify axis labels
+       y = "Frequency",
+       fill = "Penguin species") +
+  facet_grid(island ~ .)
+```
+
+# Scatterplot
+```{r}
+ggplot(data = penguins,aes(x = flipper_length_mm,
+                           y = body_mass_g)) +
+  geom_point(aes(color = species), # Add data points
+             size = 3) +
+  theme_minimal() +
+  scale_x_continuous(limits = c(160, 240)) + # Set min/max x-axis values
+  scale_y_continuous(limits = c(2500, 6500), # Set min/max y-axis values
+                     breaks = seq(2500, 6500, 1000)) + # Specify axis break values
+  scale_color_manual(values = c("darkorange","purple","cyan4")) + # Specify custom colors
+  labs(x = "Flipper length (mm)", # Specify axis labels
+       y = "Body mass (g)", 
+       color = "Penguin species")
+```
+
+# Scatterplot with best fit lines
+```{r}
+ggplot(data = penguins,aes(x = bill_length_mm,
+                           y = body_mass_g)) +
+  geom_point(aes(color = species), # Add points
+             size = 3) +
+  theme_minimal() + 
+  scale_x_continuous(limits = c(30, 60)) + # Set min/max x-axis values
+  scale_y_continuous(limits = c(2500, 6500), # Set min/max y-axis values
+                     breaks = seq(2500, 6500, 1000)) + # Specify axis break values
+  scale_color_manual(values = c("darkorange","purple","cyan4")) + # Specify custom colors
+  labs(x = "Bill length (mm)", # Set axis labels
+       y = "Body mass (g)",
+       color = "Penguin species")
+  geom_smooth(method = "lm", se = FALSE, aes(color = species)) + # Add best fit lines for each species
+  theme(legend.position = c(0,1), legend.justification = c(0,1)) # Move the legend
+```
+
+# Boxplot with individual points
+```{r}
+ggplot(data = penguins,aes(x = species,
+                           y = body_mass_g)) +
+  geom_jitter(width = 0.05, alpha = 0.2) + # Add partially-transparent data points 
+  geom_boxplot(aes(fill = species), outlier.color = NA, 
+               alpha = 0.5) + # Plot boxplots
+  theme_minimal() +
+  scale_fill_manual(values = c("darkorange","purple","cyan4"), # Set colors for groups
+                    guide = 'none') + # Turn off legend for this layer
+  labs(x = "Species", # Specify x-axis label
+       y = "Body mass (g)") # Specify y-axis label
+``` 
