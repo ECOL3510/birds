@@ -37,27 +37,17 @@ list2env((loadByProduct(dpID = 'DP1.10003.001',
                            enddate = '2019-12')),  # YYYY-MM
          .GlobalEnv)
 ```
-```{r}
-data<-read_csv("./Bird_data/brd_countdata.csv")
-```
-
-```{r}
-names(data)
-```
-
 
 #### Save each downloaded file
 We now want to save a *local* copy of each of these files, so we don't have to run this download script each time we want to work with the data!
 ```{r, eval = FALSE}
 files <- mget(ls())
-```{r}
-
-```
 
 for (i in 1:length(files)){
   # Change the SCBI_mammals text below to indicate the name of the folder where you want to store your data
   write_csv(files[[i]], file = paste0("./Bird_data/", names(files[i]), ".csv", sep=""))
 }
+
 ```
 
 If you want to download another data product, you just run through the process again by modifying the chunks below.  
