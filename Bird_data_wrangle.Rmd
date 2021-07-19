@@ -1,0 +1,132 @@
+---
+title: "Data_wrangle_birds"
+output: html_document
+---
+load required packages
+```{r setup, include=FALSE}
+#install.packages('pacman', repos = "http://cran.us.r-project.org")
+pacman::p_load(tidyverse, lubridate)
+```
+
+pull in csv's for bird and temp data
+```{r}
+path <- "./Bird_data/"
+
+files <- list.files(path=path, pattern="*.csv")
+
+for(file in files){
+  perpos <- which(strsplit(file, "")[[1]]==".")
+  assign(
+    gsub(" ","",substr(file, 1, perpos-1)),
+    read_csv(paste(path,file,sep=""), guess_max = 10000))
+}
+
+path <- "./temperature_raw/"
+
+files <- list.files(path=path, pattern="*.csv")
+
+for(file in files){
+  perpos <- which(strsplit(file, "")[[1]]==".")
+  assign(
+    gsub(" ","",substr(file, 1, perpos-1)),
+    read_csv(paste(path,file,sep=""), guess_max = 500000))
+}
+```
+Filter N/As out of temp data
+```{r}
+temp <- SAAT_30min %>% 
+  filter(!is.na(tempSingleMean))
+```
+
+Remove columns not pertinent to our needs
+```{r}
+temp_sub <- temp %>% 
+  mutate(date = as.Date(startDateTime),
+         month = month(date),
+         year = year(date),
+         day = day(date),
+         time = as_hms(startDateTime)) %>% 
+  select(siteID, year, month, day, date, time, tempSingleMean:tempSingleMaximum, finalQF)
+
+View(temp_sub)
+```
+
+Remove data that failed quality test
+```{r}
+temp_sub <- temp_sub %>% 
+  filter(finalQF != 1)
+```
+
+Pull daily average temperature from the temp data
+```{r}
+daily_temp <- temp_sub  %>% 
+  group_by(siteID, date) %>% 
+  summarize(dailyMean = mean(tempSingleMean)) %>% 
+  arrange(siteID, date)
+
+View(daily_temp)
+```
+
+Write daily temp csv
+```{r}
+daily_temp %>% 
+  write_csv('./Data_clean/daily_temp.csv')
+```
+
+change bird data name
+```{r}
+bird_raw <- brd_countdata
+```
+#select the columns we want to keep in our data
+```{r}
+bird_raw <- bird_raw %>%
+  select(siteID, startDate, taxonID, vernacularName, clusterSize, taxonRank) %>%
+  mutate(date = as.Date(startDate),
+         time = as_hms(startDate))
+         
+```
+
+
+#filter species out of taxonRank column
+```{r}
+bird_species <- bird_raw %>% 
+  filter(taxonRank == "species")
+```
+#group by species
+```{r}
+bird_species_T <- bird_species %>%
+  group_by(siteID, date, taxonID) %>%
+tally()
+```
+
+#calculating alpha diversity
+
+```{r}
+bird_diversity <- bird_species_T %>%
+  group_by(siteID, date)%>%
+summarize(alpha = n_distinct(taxonID))
+```
+```{r}
+bird_diversity %>%
+  write_csv('./Data_clean/bird_diversity.csv')
+```
+
+eliminate NAs
+```{r}
+bird_count <- bird_raw %>% 
+  filter(!is.na(clusterSize))
+```
+
+
+Find total bird count
+```{r}
+Bird_total<-bird_count %>%
+  group_by(siteID, date) %>%
+  summarize(total_birds = sum(clusterSize))
+```
+
+Write bird total csv
+```{r}
+Bird_total %>%
+  write_csv('./Data_clean/bird_total.csv')
+```
