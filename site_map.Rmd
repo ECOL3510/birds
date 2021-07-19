@@ -1,0 +1,57 @@
+---
+title: "Map of sites"
+output: 
+  html_document:
+    keep_md: true
+---
+## Load packages
+```{r}
+# install.packages('pacman', repos = "http://cran.us.r-project.org")
+pacman::p_load(tidyverse, maps)
+```
+
+## Read in metadata for all NEON sites
+```{r, message=FALSE}
+sites_all <- read_csv('./NEON_sites/NEON_Field_Site_Metadata_20210226_0.csv') %>% 
+  select(domainID:colocated_site, latitude:longitude, state:country)
+```
+
+## Define the list of your project's sites
+```{r}
+# Update this list to include your team's study sites
+# Note that each site should be in all-caps, and contained inside quotation marks
+
+mySites <- c('ABBY', 'NIWO', 'OSBS', 'TOMB')
+```
+
+## Subset "sites" object for your project sites
+```{r}
+sites <- sites_all %>% 
+  filter(siteID %in% mySites) %>% 
+  arrange(siteID)
+
+print(sites)
+```
+
+## List state names of your sites
+```{r}
+myStates <- as.character(sites$state)
+print(myStates)
+```
+
+
+## Map your sites!
+If all your sites are in the contiguous US ("lower 48"), you can use the script below:
+```{r myMap}
+# Run this chunk all at once to avoid plotting errors
+
+par(mar = c(0,0,0,0),mgp=c(0,0,0))
+maps::map('state', col='black', lwd=2) 
+maps::map('state', region = myStates, add = T, fill=T, col='tomato')  # Customize the fill color if you want!
+points(sites$longitude, sites$latitude, 
+       col='black', pch=16, cex=1.5,lwd=1)
+text(sites$longitude, sites$latitude, sites$siteID,
+     cex=1, font=2, 
+     pos = c(4, 1, 4, 4)) # 1 = below; 2 = left; 3 = above; 4 = right
+```
+In addition to printing the in-line map, R will automatically save a copy of your map into a folder called "site_map_files"! 

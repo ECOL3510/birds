@@ -2,12 +2,12 @@
 title: "Data_analysis_birds"
 output: html_document
 ---
-load required packages
+# load required packages
 ```{r setup, include=FALSE}
-pacman::p_load(tidyverse, broom, lubridate, hms, performance, see, qqplotr, gvlma,ggrepel)
+pacman::p_load(tidyverse, broom, lubridate, gvlma, caret)
 ```
 
-Pull in clean data
+# Pull in clean data
 ```{r}
 path <- "./Data_clean/"
 
@@ -21,7 +21,8 @@ for(file in files){
 }
 
 ```
-Join clean data
+
+## Join clean data
 ```{r}
 full_data <- full_join(bird_diversity, bird_total) %>% 
   full_join(., daily_temp) 
@@ -29,13 +30,13 @@ full_data <- full_join(bird_diversity, bird_total) %>%
 View(full_data)
 ```
 
-Filter out NAs
+## Filter out NAs
 ```{r}
 full_data <- full_data %>% 
   filter(!is.na(alpha & dailyMean))
 ```
 
-summarize data for statistics
+# summarize data for statistics
 ```{r}
 summary <- full_data %>% 
   group_by(siteID) %>% 
@@ -47,7 +48,7 @@ summary <- full_data %>%
 glimpse(summary)
 ```
 
-Round decimals
+## Round decimals
 ```{r}
 summary <- as_tibble(summary) %>% 
   mutate_at(vars(mean_dailyMean:se_total), funs(round(.,2))) # Round each of our calculated columns to 2 decimals
@@ -55,7 +56,7 @@ summary <- as_tibble(summary) %>%
 print(summary)
 ```
 
-Linear regression
+# Linear regression: Alpha diversity
 ```{r}
 ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the x-axis
                                     y = alpha,  # name the variable that goes on the y-axis
@@ -64,15 +65,7 @@ ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the
   theme_minimal()
 ```
 
-```{r}
-ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the x-axis
-                                    y = total_birds,  # name the variable that goes on the y-axis
-                                    col = siteID)) + # name the variable to differentiate colors
-  geom_point(pch = 16) +  # Graph these variables as a scatterplot
-  theme_minimal()
-```
-
-Run correlation for diversity
+### Run correlation for diversity
 ```{r}
 cor_div <- cor.test(full_data$dailyMean, 
                       full_data$alpha, 
@@ -81,29 +74,41 @@ cor_div <- cor.test(full_data$dailyMean,
 tidy(cor_div)
 ```
 
-Run linear regression test for diversity
+### Run linear regression test for diversity
 ```{r}
 div_model <- lm(alpha ~ dailyMean, data = full_data)
 ```
+
+#### Check model assumptions
 ```{r}
-#check_model(div_model)
 gvlma(div_model)
 ```
+
+#### View model summary
 ```{r}
 summary(div_model)
 ```
+
+#### Re-graph data with regression line
 ```{r}
 ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the x-axis
                                     y = alpha,  # name the variable that goes on the y-axis
                                     col = siteID)) + # name the variable to differentiate colors
   geom_point(pch = 16) +  # Graph these variables as a scatterplot
   geom_smooth(method = 'lm', aes(group=1), col = 'black', lty = 1) +  # lty=1 for solid line
-  #geom_abline(intercept = 6.81098, slope = -0.08871) +  # Alternate method than geom_smooth to specify line slope & intercept
   theme_minimal()
 ```
 
+# Linear regression: Total birds
+```{r}
+ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the x-axis
+                                    y = total_birds,  # name the variable that goes on the y-axis
+                                    col = siteID)) + # name the variable to differentiate colors
+  geom_point(pch = 16) +  # Graph these variables as a scatterplot
+  theme_minimal()
+```
 
-Run correlation for total
+### Run correlation for total
 ```{r}
 cor_total <- cor.test(full_data$dailyMean, 
                       full_data$total_birds, 
@@ -112,22 +117,23 @@ cor_total <- cor.test(full_data$dailyMean,
 tidy(cor_total)
 ```
 
-run linear regression for total
+### run linear regression for total
 ```{r}
 total_model <- lm(total_birds ~ dailyMean, data = full_data)
 ```
 ```{r}
-#check_model(model_name2)
 gvlma(total_model)
 ```
-
 ```{r}
-summary(total_model)
+par(mfrow=c(2,2)) # init 4 charts in 1 panel
+plot(total_model)
 ```
 
-## remove outliers then run regression
+Failed linear regression assumption tests; check for and remove outlier values
+
+## remove outliers then run regression of total
 ```{r}
-subset<-full_data %>%
+subset <- full_data %>%
   filter(total_birds<300)
 ```
 
@@ -143,6 +149,11 @@ total_model_subset <- lm(total_birds ~ dailyMean, data = subset)
 ```
 ```{r}
 gvlma(total_model_subset)
+
+```
+```{r}
+par(mfrow=c(2,2)) # init 4 charts in 1 panel
+plot(total_model_subset)
 ```
 ```{r}
 summary(total_model_subset)
@@ -153,7 +164,17 @@ ggplot(data = subset, aes(x = dailyMean, # name the variable that goes on the x-
                                     col = siteID)) + # name the variable to differentiate colors
   geom_point(pch = 16) +  # Graph these variables as a scatterplot
   geom_smooth(method = 'lm', aes(group=1), col = 'black', lty = 1) +  # lty=1 for solid line
-  #geom_abline(intercept = 6.81098, slope = -0.08871) +  # Alternate method than geom_smooth to specify line slope & intercept
   theme_minimal()
 ```
+
+## Boxcox transformation
+```{r}
+distBCMod <- caret::BoxCoxTrans(full_data$total_birds, na.rm = T)
+print(distBCMod)
+```
+```{r}
+full_data <- cbind(full_data, total_new=predict(distBCMod, full_data$total_birds)) # append the transformed variable
+head(full_data)
+```
+
 
