@@ -21,7 +21,7 @@ sites_all <- read_csv('./NEON_sites/NEON_Field_Site_Metadata_20210226_0.csv') %>
 # Update this list to include your team's study sites
 # Note that each site should be in all-caps, and contained inside quotation marks
 
-mySites <- c('ABBY', 'NIWO', 'OSBS', 'TOMB')
+mySites <- c('NOGP', 'SERC', 'STER', 'UKFS')
 ```
 
 ## Subset "sites" object for your project sites
@@ -47,7 +47,7 @@ If all your sites are in the contiguous US ("lower 48"), you can use the script 
 par(oma=c(2,2,1,1), mar = c(0,0,0,0),mgp=c(0,0,0))
 
 maps::map('state', col='black', lwd=2) 
-maps::map('state', region = myStates, add = T, fill=T, col='tomato')  # Customize the fill color if you want!
+maps::map('state', region = myStates, add = T, fill=T, col='green4')  # Customize the fill color if you want!
 
 points(sites$longitude, sites$latitude, 
        col='black', pch=16, cex=1.5,lwd=1)

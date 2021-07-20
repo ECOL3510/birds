@@ -96,7 +96,11 @@ ggplot(data = full_data, aes(x = dailyMean, # name the variable that goes on the
                                     col = siteID)) + # name the variable to differentiate colors
   geom_point(pch = 16) +  # Graph these variables as a scatterplot
   geom_smooth(method = 'lm', aes(group=1), col = 'black', lty = 1) +  # lty=1 for solid line
-  theme_minimal()
+  theme_minimal() +
+  ggtitle("Alpha diversity vs Daily mean Temperature") +
+  labs(x = "Daily mean Temp. (Celcius)", # Specify axis labels
+       y = "Alpha diversity",
+       fill = "siteID")
 ```
 
 # Linear regression: Total birds
@@ -164,7 +168,11 @@ ggplot(data = subset, aes(x = dailyMean, # name the variable that goes on the x-
                                     col = siteID)) + # name the variable to differentiate colors
   geom_point(pch = 16) +  # Graph these variables as a scatterplot
   geom_smooth(method = 'lm', aes(group=1), col = 'black', lty = 1) +  # lty=1 for solid line
-  theme_minimal()
+  theme_minimal() +
+  ggtitle("Total counts vs daily mean Temperature") +
+  labs(x = "Daily mean Temp. (Celcius)", # Specify axis labels
+       y = "Total bird count",
+       fill = "siteID")
 ```
 
 ## Boxcox transformation
@@ -176,5 +184,52 @@ print(distBCMod)
 full_data <- cbind(full_data, total_new=predict(distBCMod, full_data$total_birds)) # append the transformed variable
 head(full_data)
 ```
+## Run anova test for total birds per site
+```{r}
+ggplot(data = full_data, aes(x = siteID, # name the variable that goes on the x-axis
+                                    y = total_birds,  # name the variable that goes on the y-axis
+                                    fill = siteID)) + # name the variable to differentiate colors
+  geom_boxplot() +  # Graph these variables using boxplots
+  theme_minimal() +
+  ggtitle("Total count per site") +
+  labs(x = "Site ID", # Specify axis labels
+       y = "Total bird count",
+       fill = "siteID")
+```
+## define ANOVA model
+```{r}
+total_ANOVA <- aov(total_birds ~ siteID, data = full_data)
+summary(total_ANOVA)
+```
+```{r}
+tukey_total <- tidy(TukeyHSD(total_ANOVA))
+print(tukey_total)
+```
 
+## run ANOVA for alpha
+```{r}
+ggplot(data = full_data, aes(x = siteID, # name the variable that goes on the x-axis
+                                    y = alpha,  # name the variable that goes on the y-axis
+                                    fill = siteID)) + # name the variable to differentiate colors
+  geom_jitter(width = 0.05, alpha = 0.2) +
+  geom_boxplot(alpha=.5) +  # Graph these variables using boxplots
+  theme_minimal()  +
+  ggtitle("Alpha Diversity within Sites") +
+  labs(x = "Site ID", # Specify axis labels
+       y = "Alpha diversity",
+       fill = "siteID")
+```
+
+```{r}
+div_ANOVA <- aov(alpha ~ siteID, data = full_data)
+summary(div_ANOVA)
+```
+```{r}
+tukey_div <- tidy(TukeyHSD(div_ANOVA))
+
+print(tukey_div)
+
+tukey_div %>% 
+  filter(adj.p.value < 0.05)
+```
 

@@ -71,7 +71,7 @@ ggplot(data = penguins,aes(x = bill_length_mm,
   scale_color_manual(values = c("darkorange","purple","cyan4")) + # Specify custom colors
   labs(x = "Bill length (mm)", # Set axis labels
        y = "Body mass (g)",
-       color = "Penguin species")
+       color = "Penguin species") +
   geom_smooth(method = "lm", se = FALSE, aes(color = species)) + # Add best fit lines for each species
   theme(legend.position = c(0,1), legend.justification = c(0,1)) # Move the legend
 ```
