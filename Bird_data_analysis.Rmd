@@ -189,7 +189,8 @@ head(full_data)
 ggplot(data = full_data, aes(x = siteID, # name the variable that goes on the x-axis
                                     y = total_birds,  # name the variable that goes on the y-axis
                                     fill = siteID)) + # name the variable to differentiate colors
-  geom_boxplot() +  # Graph these variables using boxplots
+  geom_boxplot(alpha=0.5) +
+  geom_jitter(width = 0.05, alpha = 0.2) +# Graph these variables using boxplots
   theme_minimal() +
   ggtitle("Total count per site") +
   labs(x = "Site ID", # Specify axis labels
