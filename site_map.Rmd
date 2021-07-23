@@ -47,7 +47,7 @@ If all your sites are in the contiguous US ("lower 48"), you can use the script 
 par(oma=c(2,2,1,1), mar = c(0,0,0,0),mgp=c(0,0,0))
 
 maps::map('state', col='black', lwd=2) 
-maps::map('state', region = myStates, add = T, fill=T, col='green4')  # Customize the fill color if you want!
+maps::map('state', region = myStates, add = T, fill=T, col=c('#00BFC4','#C77CFF','#7CAE00','#F8766D'))  # Customize the fill color if you want!
 
 points(sites$longitude, sites$latitude, 
        col='black', pch=16, cex=1.5,lwd=1)
@@ -60,6 +60,6 @@ mtext("Latitude", 2, line=2.5, cex=1.25)
 
 text(sites$longitude, sites$latitude, sites$siteID,
      cex=1, font=2, 
-     pos = c(4, 1, 4, 4)) # 1 = below; 2 = left; 3 = above; 4 = right
+     pos = c(3, 1, 2, 2)) # 1 = below; 2 = left; 3 = above; 4 = right
 ```
 In addition to printing the in-line map, R will automatically save a copy of your map into a folder called "site_map_files"! 
